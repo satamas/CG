@@ -13,6 +13,8 @@ uniform float wave_vector_length;
 
 void main(void)
 {
-      float val = abs(sin(frequency * time_from_start + wave_vector_length * length(pass_pos - vec4(center,1)) ));
-      out_Color = vec4(val, val, val, 1);
+      float r = abs(sin(frequency * time_from_start + wave_vector_length * length(pass_pos - vec4(center,1)) ));
+      float g = abs(sin(1.1*frequency * time_from_start + wave_vector_length * length(pass_pos - vec4(center,1)) ));
+      float b = abs(sin(0.9*frequency * time_from_start + wave_vector_length * length(pass_pos - vec4(center,1)) ));
+      out_Color = vec4(r, g, b, 1);
 }

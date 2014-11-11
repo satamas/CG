@@ -10,6 +10,7 @@ GLWidget::GLWidget(QWidget *parent) :
     updateTimer(this)
 {
     QObject::connect(&updateTimer, SIGNAL(timeout()), this, SLOT(redraw()));
+    setMouseTracking(false);
     updateTimer.setSingleShot(false);
 }
 
@@ -26,10 +27,9 @@ QSize GLWidget::sizeHint() const
 void GLWidget::initializeGL(){
     loadObjFile("model.obj");
     glDisable(GL_CULL_FACE);
-    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
 
     projection.perspective(30.0f, 1.0f, 0.1f, 100.f);
-    view.lookAt(QVector3D(0.0f, 0.0f, -25.0f), QVector3D(0, 0, 0), QVector3D(0, 1, 0));
 
     defaultShaderProg = new QGLShaderProgram();
     waveShaderProg = new QGLShaderProgram();
@@ -43,6 +43,7 @@ void GLWidget::initializeGL(){
     currentShaderProg->bind();
 
     _vertexVAO.create();
+    updateTimer.start(1000 / fps);
 }
 
 void GLWidget::setWaveModelParameters(){
@@ -135,24 +136,21 @@ void GLWidget::loadShaderProgram(QGLShaderProgram * program, QString name){
 }
 
 void GLWidget::onKeyPress(QKeyEvent *event){
+    waves = false;
     if(event->key() == Qt::Key_F1){
-        updateTimer.stop();
         currentShaderProg = defaultShaderProg;
         currentShaderProg->bind();
         defaultShaderProg->setUniformValue("color_from_norm", false);
-        updateGL();
     } else if(event->key()== Qt::Key_F2){
         showGrid = !showGrid;
-        updateGL();
     } else if(event->key()==Qt::Key_F3){
         currentShaderProg = defaultShaderProg;
         currentShaderProg->bind();
         defaultShaderProg->setUniformValue("color_from_norm", true);
-        updateGL();
     } else if(event->key()==Qt::Key_F4){
         currentShaderProg = waveShaderProg;
         currentShaderProg->bind();
-        updateTimer.start(1000 / fps);
+        waves = true;
     }
 }
 
@@ -163,6 +161,8 @@ void GLWidget::paintGL()
     glClearDepth(1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    QMatrix4x4 view;
+    view.lookAt(QVector3D(0.0f, -distance * std::sin(theta * M_2_PI / 90), -distance * std::cos(theta * M_2_PI / 90)), QVector3D(0, 0, 0), QVector3D(0, 1, 0));
     currentShaderProg->setUniformValue("mvp", projection * view * model);
 
 
@@ -224,7 +224,9 @@ void GLWidget::initializeVAO(){
 
 void GLWidget::redraw(){
     timeFromStart += ((float) updateTimer.interval()) / 1000.0;
-    waveShaderProg->setUniformValue("time_from_start", timeFromStart);
+    if(waves){
+        waveShaderProg->setUniformValue("time_from_start", timeFromStart);
+    }
     updateGL();
 }
 
@@ -237,4 +239,22 @@ void GLWidget::setWaveVector(int new_wave_vector){
     waveShaderProg->bind();
     waveShaderProg->setUniformValue("wave_vector_length", (float) (float) M_2_PI * new_wave_vector / _modelRadius);
 }
+
+void GLWidget::wheelEvent(QWheelEvent* event){
+    distance -= event->delta() / 120;
+    distance = std::max(distance, 0.0f);
+}
+
+void GLWidget::mousePressEvent(QMouseEvent * event){
+    mouseX = event->x();
+    mouseY = event->y();
+}
+
+void GLWidget::mouseMoveEvent(QMouseEvent * event){
+    model.rotate( -(event->y() - mouseY), 1, 0);
+    model.rotate( -(event->x() - mouseX), 0, 1);
+    mouseX = event->x();
+    mouseY = event->y();
+}
+
 

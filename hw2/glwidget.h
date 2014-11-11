@@ -23,6 +23,9 @@ private slots:
     void redraw();
 protected:
     void initializeGL() override;
+    void wheelEvent(QWheelEvent* event) override;
+    void mouseMoveEvent(QMouseEvent * event) override;
+    void mousePressEvent(QMouseEvent * event) override;
     void paintGL() override;
     void resizeGL(int w, int h) override;
 private:
@@ -33,8 +36,12 @@ private:
     };
 
     QMatrix4x4 projection;
-    QMatrix4x4 view;
     QMatrix4x4 model;
+    float distance = 25.0f;
+    float theta = 0;
+
+    int mouseX;
+    int mouseY;
 
     QGLShaderProgram * currentShaderProg = nullptr;
     QGLShaderProgram * defaultShaderProg = nullptr;
@@ -47,6 +54,7 @@ private:
     int fps = 25;
     float timeFromStart = 0;
     bool showGrid = false;
+    bool waves = false;
 
     std::vector<QVector3D> _triangles;
     std::vector<QVector3D> _norms;
