@@ -13,10 +13,10 @@ uniform bool color_from_norm;
 void main(void)
 {
      gl_Position = mvp * vec4(vertex, 1.0);
+     pass_norm = mvp * vec4(norm, 1.0);
      if(color_from_norm){
-        pass_color = vec4(norm.y, norm.y, norm.y, 1);
+        pass_color = vec4(pass_norm.y, pass_norm.y, pass_norm.y, 1);
      } else{
         pass_color = vec4(color, 1.0);
      }
-     pass_norm = mvp * vec4(norm, 1.0);
 }
