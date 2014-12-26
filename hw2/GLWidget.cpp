@@ -165,12 +165,10 @@ void GLWidget::paintGL()
     glClearDepth(1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    QMatrix4x4 view;
+    view.setToIdentity();
     view.lookAt(QVector3D(0.0f, -distance * std::sin(theta * M_2_PI / 90), -distance * std::cos(theta * M_2_PI / 90)), QVector3D(0, 0, 0), QVector3D(0, 1, 0));
     currentShaderProg->setUniformValue("mvp", projection * view * model);
-
-
-    QGLBuffer buffer(QGLBuffer::VertexBuffer);
+    currentShaderProg->setUniformValue("model", model);
 
     glBindBuffer(GL_ARRAY_BUFFER, _vboID[0]);
     currentShaderProg->setAttributeBuffer( "vertex", GL_FLOAT, 0, 3 );

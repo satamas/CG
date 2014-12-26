@@ -37,8 +37,10 @@ private:
         int norm_idx[3];
     };
 
-    QMatrix4x4 projection;
     QMatrix4x4 model;
+    QMatrix4x4 view;
+    QMatrix4x4 projection;
+
     float distance = 25.0f;
     float theta = 0;
 
